@@ -1,0 +1,650 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>PeeQa</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: one phone-width column, bottom tab bar. First screen = headline, three actions, a real dinner suggestion. */
+:root{
+  --bg:#F4F1E8; --surface:#FFFEFA; --ink:#18271F; --muted:#58675E; --line:#D9D4C2;
+  --green:#1E5236; --green-ink:#FFFFFF; --sage:#E1EBDF; --sage-ink:#1E5236;
+  --warn:#9E411B; --warn-bg:#F8E7DD; --ok-bg:#E3EFE3; --shadow:0 1px 2px rgba(24,39,31,.08);
+  --font:"Avenir Next","Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#101812; --surface:#18231C; --ink:#ECEFE6; --muted:#9AA99E; --line:#2C3B31;
+    --green:#7CC99B; --green-ink:#0B1A11; --sage:#223428; --sage-ink:#A9DFBD;
+    --warn:#F0A07A; --warn-bg:#35221A; --ok-bg:#1F3326; --shadow:none; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#101812; --surface:#18231C; --ink:#ECEFE6; --muted:#9AA99E; --line:#2C3B31;
+  --green:#7CC99B; --green-ink:#0B1A11; --sage:#223428; --sage-ink:#A9DFBD;
+  --warn:#F0A07A; --warn-bg:#35221A; --ok-bg:#1F3326; --shadow:none; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.45 var(--font);-webkit-text-size-adjust:100%}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--green);outline-offset:2px}
+.wrap{max-width:560px;margin:0 auto;padding-block:2px 104px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.top{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-block:0}
+.brand{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;min-width:0}
+.logo{font-weight:800;font-size:20px;letter-spacing:-.02em;color:var(--green)}
+.tag{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.link{background:none;border:0;padding:10px 8px;min-height:44px;color:var(--green);font-weight:700;text-decoration:underline;text-underline-offset:3px}
+h1{font-size:25px;line-height:1.1;letter-spacing:-.025em;font-weight:800;margin:2px 0 4px;text-wrap:balance}
+h2{font-size:21px;line-height:1.2;letter-spacing:-.015em;font-weight:800;margin:0 0 4px;text-wrap:balance}
+h3{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:20px 0 8px;font-weight:700}
+p{margin:0 0 8px}
+.sub{color:var(--muted);font-size:15px}
+.small{font-size:13px;color:var(--muted)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:48px;padding:10px 16px;border-radius:12px;border:1.5px solid var(--green);background:var(--surface);color:var(--green);font-weight:700;text-align:center;line-height:1.2}
+.btn.primary{background:var(--green);color:var(--green-ink)}
+.btn.big{min-height:50px;font-size:18px;width:100%}
+.btn.sm{min-height:44px;padding:8px 12px;font-size:15px}
+.btn.quiet{border-color:var(--line);color:var(--ink);font-weight:600}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.actions{display:grid;gap:8px;margin-top:8px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-height:42px;padding:6px 14px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);font-weight:600;font-size:15px}
+.chip[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:var(--green-ink)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:10px}
+.panel h3:first-child{margin-top:0}
+.summary{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px;font-size:13px;color:var(--muted)}
+.summary span{min-width:0}
+.pick{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px;margin-top:8px;box-shadow:var(--shadow)}
+.pick-head{display:flex;gap:12px;align-items:center}
+.dish{display:inline-grid;place-items:center;width:46px;height:46px;border-radius:12px;background:var(--sage);font-size:26px;flex:none}
+.eyebrow{font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--muted)}
+.facts{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:8px;margin:10px 0 0}
+.facts div{background:var(--sage);border-radius:10px;padding:8px 10px;min-width:0}
+.facts dt{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--sage-ink);font-weight:700}
+.facts dd{margin:0;font-size:19px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--sage-ink)}
+.facts small{display:block;font-size:12px;color:var(--sage-ink);opacity:.9}
+.why{font-size:14px;color:var(--muted);margin:6px 0 8px}
+.row{display:grid;grid-template-columns:1.3fr 1fr;gap:8px;margin-top:10px}
+.badge{display:inline-block;font-size:12px;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--sage);color:var(--sage-ink);margin:0 6px 4px 0}
+.badge.warn{background:var(--warn-bg);color:var(--warn)}
+.note{border-radius:12px;padding:10px 12px;font-size:14px;background:var(--warn-bg);color:var(--warn);margin-top:10px}
+.note.ok{background:var(--ok-bg);color:var(--sage-ink)}
+.note b{font-weight:800}
+.meals{display:grid;gap:8px;margin-top:10px}
+.meal{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px;min-height:64px}
+.meal .mt{display:flex;flex-direction:column;min-width:0;flex:1}
+.meal b{font-size:16px}
+.meal small{color:var(--muted);font-size:13px}
+.chev{font-size:24px;color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:8px}
+.card .btn-row{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+input[type=search],input[type=number]{width:100%;min-height:48px;padding:10px 12px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface)}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1.5px solid var(--green);border-radius:12px;overflow:hidden;margin-top:10px}
+.seg button{min-height:44px;border:0;background:var(--surface);font-weight:700;color:var(--green)}
+.seg button[aria-pressed="true"]{background:var(--green);color:var(--green-ink)}
+.stepper{display:inline-flex;align-items:center;gap:6px}
+.stepper button{width:44px;height:44px;border-radius:12px;border:1.5px solid var(--green);background:var(--surface);color:var(--green);font-size:22px;font-weight:700}
+.stepper output{min-width:28px;text-align:center;font-weight:800;font-size:18px;font-variant-numeric:tabular-nums}
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;padding:6px 6px 6px 0;font-weight:700}
+.tbl td{padding:8px 6px 8px 0;border-top:1px solid var(--line);vertical-align:top}
+.tbl td.num,.tbl th.num{text-align:right;font-variant-numeric:tabular-nums;padding-right:0;padding-left:6px}
+.scroll{overflow-x:auto}
+ol.steps{margin:0;padding-left:22px;display:grid;gap:8px}
+.cost{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.cost div{background:var(--sage);color:var(--sage-ink);border-radius:12px;padding:10px 12px}
+.cost b{display:block;font-size:20px;font-variant-numeric:tabular-nums}
+.cost small{font-size:12px}
+.li{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line)}
+.li input[type=checkbox]{width:26px;height:26px;margin:2px 0 0;accent-color:var(--green);flex:none}
+.li .lt{min-width:0;flex:1}
+.li.done .lt{opacity:.55;text-decoration:line-through}
+.li .buy{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.empty{text-align:center;padding:28px 12px;color:var(--muted)}
+.empty .btn{margin-top:8px}
+.price{display:grid;grid-template-columns:1fr 104px;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.price.mod label::after{content:" (edited)";color:var(--green);font-size:12px}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);z-index:20}
+nav.tabs .in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);padding-left:max(4px,env(safe-area-inset-left,0px));padding-right:max(4px,env(safe-area-inset-right,0px))}
+nav.tabs button{position:relative;min-height:58px;border:0;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:11.5px;font-weight:700;color:var(--muted)}
+nav.tabs button[aria-current="page"]{color:var(--green)}
+nav.tabs svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+nav.tabs .n{position:absolute;top:5px;left:calc(50% + 7px);min-width:18px;height:18px;border-radius:9px;background:var(--warn);color:var(--surface);font-size:11px;display:grid;place-items:center;padding:0 4px}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(76px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:600;font-size:15px;z-index:30;max-width:calc(100vw - 32px);opacity:0;pointer-events:none;transition:opacity .15s}
+#toast.show{opacity:1}
+.back{display:inline-flex;align-items:center;gap:4px;background:none;border:0;color:var(--green);font-weight:700;min-height:44px;padding:0}
+.kv{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-top:1px solid var(--line);font-size:15px}
+.kv:first-child{border-top:0}
+a{color:var(--green);font-weight:700}
+@media (prefers-reduced-motion: reduce){#toast{transition:none}}
+</style>
+<div id="app"></div>
+<div id="toast" role="status" aria-live="polite"></div>
+<script>
+(function(){
+'use strict';
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ================= Ingredient table =================
+   u = unit used in recipes, pack = size of one realistic purchase in that unit,
+   pl = label of that purchase, pr = provisional price (KSh) of one purchase. */
+const ING={};
+function I(id,n,grp,u,pack,pl,pr,x){ING[id]=Object.assign({id,n,grp,u,pack,pl,pr,whole:false,nm:null},x||{});}
+I('unga','Maize flour (unga)','staple','g',1000,'1 kg packet',110);
+I('rice','Rice','staple','g',1000,'1 kg',180);
+I('wheat','Wheat flour','staple','g',1000,'1 kg packet',105);
+I('pasta','Spaghetti','staple','g',500,'500 g packet',110);
+I('bread','Bread','staple','slice',12,'1 loaf (about 12 slices)',65,{whole:true});
+I('sukuma','Sukuma wiki (kale)','fresh','bunch',1,'1 bunch',30);
+I('spinach','Spinach','fresh','bunch',1,'1 bunch',30);
+I('managu','Managu','fresh','bunch',1,'1 bunch',40);
+I('cabbage','Cabbage','fresh','head',1,'1 small head',70);
+I('onion','Onions','fresh','pc',1,'1 onion',15,{nm:['onion','onions']});
+I('tomato','Tomatoes','fresh','pc',1,'1 tomato',15,{nm:['tomato','tomatoes']});
+I('carrot','Carrots','fresh','pc',1,'1 carrot',15,{nm:['carrot','carrots']});
+I('garlic','Garlic','fresh','clove',8,'1 bulb (about 8 cloves)',15,{whole:true});
+I('coriander','Coriander (dhania)','fresh','bunch',1,'1 bunch',10);
+I('potato','Potatoes','fresh','g',500,'about 500 g',50);
+I('sweetpot','Sweet potatoes','fresh','g',500,'about 500 g',50);
+I('nduma','Nduma (arrowroot)','fresh','g',500,'about 500 g',80);
+I('matoke','Matoke (cooking bananas)','fresh','pc',1,'1 banana',15,{whole:true,nm:['banana','bananas']});
+I('peas','Green peas','fresh','g',250,'about 250 g',50);
+I('eggs','Eggs','fresh','pc',1,'1 egg (a tray costs less per egg)',18,{whole:true,nm:['egg','eggs']});
+I('beef','Beef (stewing)','fresh','g',500,'500 g',350);
+I('mince','Minced beef','fresh','g',500,'500 g',380);
+I('chicken','Chicken pieces','fresh','g',500,'500 g',300);
+I('pork','Pork','fresh','g',500,'500 g',400);
+I('goat','Goat meat','fresh','g',500,'500 g',450);
+I('tilapia','Tilapia (whole, medium)','fresh','pc',1,'1 fish',300,{whole:true,nm:['fish','fish']});
+I('omena','Omena (dried)','fresh','g',100,'about 100 g',60);
+I('beans','Beans (boiled)','fresh','g',500,'boil about 170 g dry beans',45);
+I('ndengu','Ndengu (boiled)','fresh','g',500,'boil about 170 g dry ndengu',55);
+I('githeri','Githeri base (boiled maize and beans)','fresh','g',500,'boil about 170 g dry maize and beans',45);
+I('oil','Cooking oil','pantry','ml',500,'500 ml bottle',190);
+I('salt','Salt','pantry','g',500,'500 g packet',40);
+I('spice','Curry or pilau masala, or a stock cube','pantry','tsp',30,'1 sachet or small jar',50);
+
+const MEAT=['beef','mince','chicken','pork','goat','tilapia','omena'];
+const AHEAD={
+  beans:'Needs beans that are already boiled. From dry beans: soak overnight, then boil about 1½ to 2 hours (less in a pressure cooker). Canned beans also work and cost more.',
+  ndengu:'Needs ndengu that is already boiled. From dry: soak 2 to 4 hours, then boil about 45 to 60 minutes.',
+  githeri:'Needs githeri (maize and beans) that is already boiled. From dry: soak overnight, then boil 2 to 3 hours, or use a pressure cooker.'
+};
+
+/* ================= Recipes =================
+   ing: [ingredientId, quantity for bs servings]. t = minutes of cooking once ingredients are ready. */
+const R=[];
+function M(o){R.push(o);}
+const UGALI='Boil about 650 ml of water. Add the flour gradually while stirring, cover for 2 minutes, then press and turn until smooth and firm (about 5 minutes).';
+M({id:'ugali-sukuma',n:'Ugali & sukuma wiki',e:'🥬',bs:2,t:25,ing:[['unga',300],['sukuma',1],['onion',.5],['tomato',1],['oil',30],['salt',3]],
+ steps:['Wash the sukuma wiki and slice it thinly.','Heat the oil and fry the chopped onion until soft. Add the tomato and cook until mushy.','Add the sukuma wiki and salt. Cook 5 to 7 minutes, stirring.',UGALI,'Serve the greens with the ugali.']});
+M({id:'ugali-eggs',n:'Ugali, eggs & kachumbari',e:'🍳',bs:2,t:25,ing:[['unga',300],['eggs',4],['onion',1],['tomato',2],['coriander',.25],['oil',30],['salt',3]],
+ steps:['Chop the onion and tomatoes. Keep half raw with the coriander and a pinch of salt for kachumbari.','Fry the rest of the onion in the oil, add the tomato, then pour in the beaten eggs. Stir until fully set.',UGALI,'Serve the ugali with the eggs and kachumbari.']});
+M({id:'ugali-beef',n:'Ugali & beef stew',e:'🍲',bs:2,t:75,ing:[['unga',300],['beef',300],['onion',1],['tomato',2],['garlic',2],['oil',40],['spice',2],['salt',3]],
+ steps:['Boil the beef in water with a little salt for 45 to 60 minutes until tender (a pressure cooker takes about 25).','Fry the onion and garlic in the oil. Add the tomatoes and spice, and cook down to a thick sauce.','Add the beef and a cup of its broth. Simmer 10 minutes.',UGALI,'Serve.']});
+M({id:'ugali-tilapia',n:'Fried tilapia, ugali & sukuma',e:'🐟',bs:2,t:40,ing:[['unga',300],['tilapia',1],['sukuma',1],['tomato',1],['onion',.5],['oil',80],['salt',4]],
+ steps:['Clean the fish, score both sides and rub with salt.','Shallow-fry in hot oil, about 6 to 8 minutes a side, until cooked through and crisp.','In a second pan fry the onion and tomato, then the sliced sukuma wiki, for 6 minutes.',UGALI,'Serve together.']});
+M({id:'rice-ndengu',n:'Rice & ndengu',e:'🍚',bs:2,t:30,ahead:'ndengu',ing:[['rice',250],['ndengu',300],['onion',1],['tomato',2],['garlic',2],['oil',30],['spice',1],['salt',3]],
+ steps:['Rinse the rice, cook it in about 500 ml of salted water until tender (15 to 18 minutes).','Fry the onion and garlic in the oil, add the tomatoes and spice.','Add the boiled ndengu and a little water. Simmer 10 minutes until thick.','Serve over the rice.']});
+M({id:'chapati-beans',n:'Chapati & beans',e:'🫓',bs:2,t:60,ahead:'beans',ing:[['wheat',300],['beans',400],['onion',1],['tomato',2],['oil',80],['spice',1],['salt',4]],
+ steps:['Mix flour, a pinch of salt and warm water into a soft dough. Knead 5 minutes and rest 20 to 30 minutes.','Fry the onion in a little oil, add tomato and spice, then the boiled beans. Simmer 10 minutes.','Roll the dough into balls, then thin rounds. Brush with oil, roll up, coil and roll flat again.','Cook each chapati on a medium pan with a little oil, turning until golden on both sides.','Serve with the beans.']});
+M({id:'githeri-fry',n:'Fried githeri',e:'🌽',bs:2,t:25,ahead:'githeri',ing:[['githeri',500],['onion',1],['tomato',2],['carrot',1],['sukuma',.5],['oil',30],['salt',3]],
+ steps:['Grate the carrot and slice the sukuma wiki.','Fry the onion in the oil, add tomatoes and carrot, and cook until soft.','Add the boiled githeri, sukuma wiki and salt. Stir and cook 8 to 10 minutes.','Serve hot.']});
+M({id:'mukimo',n:'Mukimo with greens',e:'🥔',bs:2,t:40,ing:[['potato',600],['peas',150],['sukuma',1],['onion',.5],['oil',20],['salt',4]],
+ steps:['Peel and chop the potatoes. Boil with the peas in salted water until soft (about 20 minutes).','Fry the onion in the oil, add the sliced sukuma wiki and cook 5 minutes.','Drain the potatoes and peas, add the greens and mash everything together until mostly smooth.','Serve warm.']});
+M({id:'nduma-kachumbari',n:'Boiled nduma & kachumbari',e:'🍠',bs:2,t:40,ing:[['nduma',600],['tomato',2],['onion',1],['coriander',.25],['salt',3]],
+ steps:['Wash and peel the nduma, cut into chunks.','Boil in salted water for 25 to 30 minutes until a knife goes in easily.','Chop the tomatoes, onion and coriander with a pinch of salt for kachumbari.','Serve the nduma with the kachumbari.']});
+M({id:'omena-ugali',n:'Omena & ugali',e:'🐟',bs:2,t:35,ing:[['unga',300],['omena',100],['tomato',2],['onion',1],['oil',40],['salt',2]],
+ steps:['Pick over the omena and rinse well. Boil 5 minutes, then drain.','Fry the onion in the oil, add the tomatoes and cook down.','Add the omena and a splash of water. Simmer 10 minutes.',UGALI,'Serve.']});
+M({id:'managu-ugali',n:'Managu & ugali',e:'🌿',bs:2,t:35,ing:[['unga',300],['managu',2],['onion',1],['tomato',1],['oil',30],['salt',3]],
+ steps:['Strip the managu leaves from the stalks and wash well. Boil 5 minutes to reduce bitterness, then drain.','Fry the onion in the oil, add the tomato, then the managu and salt. Cook 8 to 10 minutes.',UGALI,'Serve.']});
+M({id:'pilau',n:'Beef pilau',e:'🍛',bs:2,t:80,ing:[['rice',300],['beef',300],['potato',200],['onion',2],['garlic',3],['oil',60],['spice',3],['salt',4]],
+ steps:['Boil the beef in salted water until tender (45 to 60 minutes). Keep the broth.','In a heavy pot fry the sliced onions in the oil until deep brown. Add garlic and pilau masala.','Add the beef and potato chunks and fry 5 minutes.','Add the washed rice and 600 ml of the hot broth with salt. Cover on low heat for 20 minutes without lifting the lid.','Fluff and serve.']});
+M({id:'chicken-rice',n:'Chicken stew & rice',e:'🍗',bs:2,t:55,ing:[['chicken',500],['rice',300],['onion',1],['tomato',2],['carrot',1],['garlic',2],['oil',40],['spice',2],['salt',4]],
+ steps:['Season the chicken with salt and brown it in the oil. Remove it.','Fry the onion and garlic, add tomatoes, carrot and spice, and cook down.','Return the chicken with a cup of water. Simmer covered 30 minutes until cooked through, with no pink at the bone.','Cook the rice separately in salted water, about 15 to 18 minutes.','Serve.']});
+M({id:'pork-ugali',n:'Fried pork, ugali & sukuma',e:'🥩',bs:2,t:55,ing:[['pork',400],['unga',300],['onion',1],['tomato',1],['sukuma',1],['oil',40],['salt',4]],
+ steps:['Boil the pork in salted water for 25 to 30 minutes.','Drain and fry in the oil until browned and crisp at the edges (10 minutes). Make sure it is cooked through.','Fry the onion and tomato, add the sliced sukuma wiki and cook 6 minutes.',UGALI,'Serve together.']});
+M({id:'goat-ugali',n:'Goat stew & ugali',e:'🐐',bs:2,t:105,ing:[['goat',400],['unga',300],['onion',1],['tomato',2],['garlic',2],['oil',40],['spice',2],['salt',4]],
+ steps:['Boil the goat meat in salted water 60 to 75 minutes until tender (a pressure cooker takes about 35).','Fry the onion and garlic, add tomatoes and spice, and cook down.','Add the meat and some broth. Simmer 15 minutes.',UGALI,'Serve.']});
+M({id:'egg-fried-rice',n:'Egg fried rice',e:'🍚',bs:2,t:25,ing:[['rice',250],['eggs',3],['carrot',1],['onion',.5],['peas',100],['oil',30],['salt',3]],
+ steps:['Cook the rice in salted water and spread it out to cool a little.','Fry the diced carrot, onion and peas for 5 minutes.','Push to one side, scramble the eggs in the pan until set, then mix everything with the rice.','Fry 3 minutes more and serve.']});
+M({id:'spag-mince',n:'Spaghetti & minced beef',e:'🍝',bs:2,t:30,ing:[['pasta',250],['mince',250],['onion',1],['tomato',2],['carrot',1],['garlic',2],['oil',30],['salt',3]],
+ steps:['Boil the spaghetti in salted water until soft (about 10 minutes) and drain.','Fry the onion and garlic, add the mince and cook until browned all the way through.','Add grated carrot and chopped tomatoes. Simmer 10 minutes.','Mix with the spaghetti and serve.']});
+M({id:'chips-mayai',n:'Chips mayai',e:'🍟',bs:2,t:30,kw:['mayai'],ing:[['potato',500],['eggs',3],['onion',.5],['tomato',1],['oil',150],['salt',3]],
+ steps:['Peel the potatoes and cut into chips. Pat them dry.','Fry in hot oil until golden (10 to 12 minutes). Drain.','Beat the eggs with chopped onion, tomato and salt.','Pour the egg mixture over the chips in a hot pan with a little oil. Cook until set, flip and serve.']});
+M({id:'ugali-cabbage',n:'Ugali & fried cabbage',e:'🥬',bs:2,t:25,ing:[['unga',300],['cabbage',.5],['onion',1],['tomato',1],['carrot',.5],['oil',30],['salt',3]],
+ steps:['Shred the cabbage and grate the carrot.','Fry the onion in the oil, add the tomato, then cabbage, carrot and salt. Cook 8 minutes, stirring.',UGALI,'Serve.']});
+M({id:'sweet-potato-eggs',n:'Sweet potatoes, boiled eggs & kachumbari',e:'🍠',bs:2,t:30,ing:[['sweetpot',600],['eggs',2],['tomato',1],['onion',.5],['coriander',.25],['salt',2]],
+ steps:['Peel the sweet potatoes, cut into chunks and boil 15 to 20 minutes until soft.','Boil the eggs for 10 minutes, cool in water and peel.','Chop the tomato, onion and coriander with a pinch of salt.','Serve everything together.']});
+M({id:'matoke-beans',n:'Matoke & beans',e:'🍌',bs:2,t:45,ahead:'beans',ing:[['matoke',6],['beans',250],['onion',1],['tomato',2],['oil',30],['spice',1],['salt',3]],
+ steps:['Peel the matoke, cut into chunks and boil in salted water 25 to 30 minutes until soft.','Fry the onion in the oil, add the tomatoes and spice.','Add the boiled beans and a little water. Simmer 10 minutes.','Mash the matoke lightly and serve with the beans.']});
+M({id:'rice-beans',n:'Rice & beans',e:'🍚',bs:2,t:30,ahead:'beans',ing:[['rice',250],['beans',300],['onion',1],['tomato',2],['oil',30],['spice',1],['salt',3]],
+ steps:['Cook the rice in salted water, about 15 to 18 minutes.','Fry the onion, add the tomatoes and spice.','Add the boiled beans and a little water. Simmer 10 minutes until thick.','Serve over the rice.']});
+M({id:'egg-curry-rice',n:'Egg curry & rice',e:'🥚',bs:2,t:35,ing:[['eggs',4],['rice',250],['onion',1],['tomato',2],['garlic',2],['oil',30],['spice',2],['salt',3]],
+ steps:['Boil the eggs for 10 minutes, cool and peel.','Cook the rice in salted water.','Fry the onion and garlic, add the tomatoes and spice, and cook to a thick sauce with a splash of water.','Add the eggs and simmer 5 minutes. Serve over the rice.']});
+M({id:'tilapia-rice',n:'Tilapia stew & rice',e:'🐟',bs:2,t:45,ing:[['tilapia',1],['rice',250],['tomato',3],['onion',1],['garlic',2],['oil',60],['salt',4]],
+ steps:['Clean the fish and rub with salt. Fry lightly in half the oil, 4 minutes a side.','Fry the onion and garlic in the rest of the oil, add the tomatoes and a cup of water. Simmer 10 minutes.','Add the fish and simmer 8 minutes more until cooked through.','Cook the rice in salted water and serve with the fish.']});
+M({id:'mince-sukuma-ugali',n:'Mince with sukuma & ugali',e:'🥘',bs:2,t:35,ing:[['unga',300],['mince',250],['sukuma',1],['onion',1],['tomato',1],['oil',30],['salt',3]],
+ steps:['Fry the onion, add the mince and cook until browned all the way through.','Add the tomato and cook down. Add the sliced sukuma wiki and salt, and cook 6 minutes.',UGALI,'Serve.']});
+M({id:'chicken-potatoes',n:'Chicken & potato one-pot',e:'🍗',bs:2,t:55,ing:[['chicken',500],['potato',500],['onion',1],['tomato',2],['carrot',1],['garlic',2],['oil',40],['spice',2],['salt',4]],
+ steps:['Brown the seasoned chicken in the oil and set aside.','Fry the onion and garlic, add the tomatoes and spice.','Return the chicken, add chunked potatoes, carrot and a cup of water. Cover and simmer 30 to 35 minutes until the chicken is cooked through.','Serve.']});
+M({id:'spinach-egg-ugali',n:'Spinach, eggs & ugali',e:'🥚',bs:2,t:25,ing:[['unga',300],['spinach',1],['eggs',3],['onion',1],['tomato',1],['oil',30],['salt',3]],
+ steps:['Slice the spinach. Fry the onion and tomato in the oil.','Add the spinach and salt, cook 4 minutes, then stir in the beaten eggs until set.',UGALI,'Serve.']});
+M({id:'rice-cabbage',n:'Rice & cabbage',e:'🥬',bs:2,t:30,ing:[['rice',250],['cabbage',.5],['onion',1],['tomato',1],['carrot',1],['oil',30],['salt',3]],
+ steps:['Cook the rice in salted water.','Shred the cabbage and grate the carrot.','Fry the onion and tomato, add the cabbage and carrot, and cook 8 minutes.','Serve with the rice.']});
+M({id:'spag-tomato',n:'Spaghetti in tomato sauce',e:'🍝',bs:2,t:25,ing:[['pasta',250],['tomato',3],['onion',1],['garlic',2],['carrot',1],['oil',30],['salt',3]],
+ steps:['Boil the spaghetti in salted water until soft and drain.','Fry the onion and garlic, add chopped tomatoes and grated carrot. Cook 10 minutes until saucy.','Mix with the spaghetti and serve.']});
+M({id:'eggs-bread',n:'Egg scramble on bread',e:'🍞',bs:2,t:15,ing:[['eggs',3],['bread',4],['onion',.5],['tomato',1],['oil',20],['salt',2]],
+ steps:['Chop the onion and tomato and fry them in the oil for 3 minutes.','Add the beaten eggs and salt. Stir until set.','Serve on or beside the bread.']});
+
+const RID={};
+R.forEach(r=>{
+  RID[r.id]=r;
+  r.veg=!r.ing.some(([id])=>MEAT.includes(id));
+  r.prot=r.ing.some(([id,q])=>MEAT.includes(id)||(id==='eggs'&&q/r.bs>=2)||((id==='beans'||id==='ndengu'||id==='githeri')&&q/r.bs>=150));
+  r.animal=r.ing.some(([id])=>MEAT.includes(id)||id==='eggs');
+  r.hay=[r.n,...r.ing.map(([id])=>ING[id].n),r.veg?'vegetarian veg':'',r.prot?'protein high-protein':'',...(r.kw||[])].join(' ').toLowerCase();
+});
+
+/* ================= Buy-food planning ranges (author's estimates, per person, not live) ================= */
+const BUY=[
+ {id:'b1',kind:'local',n:'Chapati or rice with beans / ndengu',lo:100,hi:180},
+ {id:'b2',kind:'local',n:'Ugali or rice with beef or chicken stew',lo:200,hi:380},
+ {id:'b3',kind:'local',n:'Chips mayai',lo:120,hi:250},
+ {id:'b4',kind:'local',n:'Fried tilapia with ugali',lo:350,hi:700},
+ {id:'b5',kind:'rest',n:'Pilau or biryani plate',lo:250,hi:450},
+ {id:'b6',kind:'rest',n:'Shawarma or wrap',lo:250,hi:500},
+ {id:'b7',kind:'rest',n:'Nyama choma with sides',lo:450,hi:850},
+ {id:'b8',kind:'rest',n:'Fish and chips',lo:400,hi:750},
+ {id:'b9',kind:'chain',n:'Fried chicken and chips meal',lo:500,hi:900},
+ {id:'b10',kind:'chain',n:'Burger and chips',lo:450,hi:900},
+ {id:'b11',kind:'chain',n:'Pizza (one person’s share)',lo:400,hi:900}
+];
+const KINDS={local:'Local eatery',rest:'Restaurant',chain:'Fast-food chain'};
+const FEE=[100,300];
+
+/* ================= State & storage ================= */
+const KEY='leo-tule-nini.v2';
+const state={view:'today',back:'today',rid:null,serv:1,help:false,mf:false,q:'',mealsTab:'all',buyKind:'all',clearAsk:false,
+  pick:null,seen:new Set(),
+  prefs:{budget:null,time:null,diet:'any',people:1},saved:[],list:[],checked:{},have:[],pantryOk:true,prices:{}};
+
+function sanitize(o){
+  const out={};if(!o||typeof o!=='object')return out;
+  const p=o.prefs&&typeof o.prefs==='object'?o.prefs:{};
+  out.prefs={
+    budget:[150,250,400].includes(p.budget)?p.budget:null,
+    time:[15,30,60].includes(p.time)?p.time:null,
+    diet:['any','veg','cheap','protein'].includes(p.diet)?p.diet:'any',
+    people:Number.isInteger(p.people)&&p.people>=1&&p.people<=4?p.people:1};
+  out.saved=Array.isArray(o.saved)?o.saved.filter(id=>typeof id==='string'&&RID[id]):[];
+  out.list=Array.isArray(o.list)?o.list.filter(e=>e&&RID[e.rid]&&Number.isInteger(e.servings)&&e.servings>=1&&e.servings<=8).map(e=>({rid:e.rid,servings:e.servings})):[];
+  out.checked={};if(o.checked&&typeof o.checked==='object')Object.keys(o.checked).forEach(k=>{if(ING[k]&&typeof o.checked[k]==='boolean')out.checked[k]=o.checked[k];});
+  out.have=Array.isArray(o.have)?o.have.filter(id=>ING[id]&&ING[id].grp!=='pantry'):[];
+  out.pantryOk=typeof o.pantryOk==='boolean'?o.pantryOk:true;
+  out.prices={};if(o.prices&&typeof o.prices==='object')Object.keys(o.prices).forEach(k=>{const v=o.prices[k];if(ING[k]&&typeof v==='number'&&isFinite(v)&&v>0&&v<100000)out.prices[k]=v;});
+  return out;
+}
+function load(){try{const raw=localStorage.getItem(KEY);if(!raw)return;Object.assign(state,sanitize(JSON.parse(raw)));}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({prefs:state.prefs,saved:state.saved,list:state.list,checked:state.checked,have:state.have,pantryOk:state.pantryOk,prices:state.prices}));}catch(e){}}
+
+/* ================= Costing ================= */
+const price=id=>state.prices[id]!==undefined?state.prices[id]:ING[id].pr;
+const r5=x=>Math.max(5,Math.round(x/5)*5);
+const money=x=>'KSh '+r5(x).toLocaleString('en-KE');
+const moneyExact=x=>'KSh '+Math.round(x).toLocaleString('en-KE');
+function roundQty(g,raw){
+  if(g.whole)return Math.max(1,Math.ceil(raw-1e-9));
+  if(g.u==='g'||g.u==='ml'){const s=raw<20?1:raw<100?5:10;return Math.max(s,Math.round(raw/s)*s);}
+  if(g.u==='tsp')return Math.max(.5,Math.round(raw*2)/2);
+  return Math.max(.25,Math.round(raw*4)/4);
+}
+function frac(x){const w=Math.floor(x+1e-9);const f=Math.round((x-w)*4)/4;if(f>=1)return String(w+1);const s=({0:'',.25:'¼',.5:'½',.75:'¾'})[f];const out=(w?String(w):'')+s;return out||'0';}
+function fmtQty(id,q){
+  const g=ING[id];
+  if(g.u==='g')return q>=1000?(Math.round(q/100)/10)+' kg':q+' g';
+  if(g.u==='ml')return q>=1000?(Math.round(q/100)/10)+' L':q+' ml';
+  if(g.u==='tsp')return frac(q)+' tsp';
+  if(g.u==='pc')return frac(q)+' '+(q>1?g.nm[1]:g.nm[0]);
+  const n={bunch:['bunch','bunches'],head:['head','heads'],clove:['clove','cloves'],slice:['slice','slices']}[g.u];
+  return frac(q)+' '+(q>1?n[1]:n[0]);
+}
+function calc(r,serv){
+  const lines=r.ing.map(([id,b])=>{const g=ING[id];const qty=roundQty(g,b*serv/r.bs);return{id,qty,used:qty/g.pack*price(id)};});
+  const used=lines.reduce((a,l)=>a+l.used,0);
+  return{lines,used,per:used/serv};
+}
+const packsFor=(id,qty)=>Math.ceil(qty/ING[id].pack-1e-9);
+function basket(entries){
+  const m={};
+  entries.forEach(e=>{const r=RID[e.rid];if(!r)return;calc(r,e.servings).lines.forEach(l=>{const x=m[l.id]||(m[l.id]={id:l.id,need:0,from:[]});x.need+=l.qty;x.from.push({rid:e.rid,qty:l.qty});});});
+  return Object.values(m).map(x=>{const packs=packsFor(x.id,x.need);return Object.assign(x,{packs,buy:packs*price(x.id),used:x.need/ING[x.id].pack*price(x.id)});});
+}
+const basketTotal=(b,skipPantry)=>b.filter(x=>!(skipPantry&&ING[x.id].grp==='pantry')).reduce((a,x)=>a+x.buy,0);
+const isChecked=id=>Object.prototype.hasOwnProperty.call(state.checked,id)?state.checked[id]:ING[id].grp==='pantry';
+
+/* ================= Recommendation ================= */
+function evalMeal(r,people,have){
+  const c=calc(r,people);const ev={r,c,hit:[],miss:[],buyCost:0,cost:c.used};
+  if(have&&have.size){
+    c.lines.forEach(l=>{const g=ING[l.id];if(g.grp==='pantry'&&state.pantryOk)return;(have.has(l.id)?ev.hit:ev.miss).push(l);});
+    ev.buyCost=ev.miss.reduce((a,l)=>a+packsFor(l.id,l.qty)*price(l.id),0);ev.cost=ev.buyCost;
+  }
+  return ev;
+}
+const evalAll=(p,have)=>R.map(r=>evalMeal(r,p.people,have));
+function passes(ev,p){
+  const r=ev.r;
+  if(p.diet==='veg'&&!r.veg)return false;
+  if(p.diet==='protein'&&!r.prot)return false;
+  if(p.time&&r.t>p.time)return false;
+  if(p.budget&&ev.cost>p.budget+1e-9)return false;
+  return true;
+}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function closest(all,p){
+  let base=all.filter(e=>(p.diet!=='veg'||e.r.veg)&&(p.diet!=='protein'||e.r.prot));if(!base.length)base=all;
+  return base.map(e=>({e,s:(p.budget?Math.max(0,e.cost-p.budget)/p.budget:0)+(p.time?Math.max(0,e.r.t-p.time)/p.time:0)})).sort((a,b)=>a.s-b.s)[0].e;
+}
+function pickNext(){
+  const p=state.prefs;const all=evalAll(p,null);const ok=all.filter(e=>passes(e,p));
+  if(!ok.length){
+    const e=closest(all,p);const notes=[];
+    if(p.budget&&e.cost>p.budget)notes.push('about KSh '+(Math.ceil((e.cost-p.budget)/5)*5)+' over your budget');
+    if(p.time&&e.r.t>p.time)notes.push((e.r.t-p.time)+' min over your time limit');
+    state.pick={id:e.r.id,fallback:notes,only:false};return;
+  }
+  let pool=ok.slice();
+  if(p.diet==='cheap')pool.sort((a,b)=>a.c.per-b.c.per);else shuffle(pool);
+  let fresh=pool.filter(e=>!state.seen.has(e.r.id));
+  if(!fresh.length){const cur=state.pick&&state.pick.id;state.seen=new Set(cur?[cur]:[]);fresh=pool.filter(e=>!state.seen.has(e.r.id));if(!fresh.length)fresh=pool;}
+  const e=fresh[0];state.seen.add(e.r.id);state.pick={id:e.r.id,fallback:null,only:ok.length===1};
+}
+function reasons(ev,p){
+  const a=[];
+  if(p.budget)a.push('about '+money(ev.c.used)+' for '+p.people+', inside your KSh '+p.budget+' budget');
+  if(p.time)a.push('ready in '+ev.r.t+' min (your limit is '+p.time+')');
+  if(p.diet==='veg')a.push('vegetarian');
+  if(p.diet==='protein')a.push('high in protein');
+  if(p.diet==='cheap')a.push('among the cheapest per serving');
+  if(!a.length)return 'No limits set. Add a budget or time limit under "Help me choose".';
+  const s=a.join(', ');return 'Fits: '+s.charAt(0).toUpperCase()+s.slice(1)+'.';
+}
+function summary(p){
+  const a=[];if(p.budget)a.push('under KSh '+p.budget);if(p.time)a.push('up to '+p.time+' min');
+  if(p.diet!=='any')a.push({veg:'vegetarian',cheap:'cheapest first',protein:'high protein'}[p.diet]);
+  a.push('for '+p.people);return a.join(' · ');
+}
+const hasLimits=p=>!!(p.budget||p.time||p.diet!=='any');
+
+/* ================= Views ================= */
+const ICON={
+ today:'<circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>',
+ meals:'<path d="M4 6h16M4 12h16M4 18h10"/>',
+ have:'<circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/>',
+ buy:'<path d="M6 8h12l-1 12H7L6 8z"/><path d="M9 8a3 3 0 016 0"/>',
+ list:'<path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/>'
+};
+const TABS=[['today','Today'],['meals','Meals'],['have','I have'],['buy','Buy food'],['list','List']];
+function chip(label,on,a,k,v){return `<button class="chip" aria-pressed="${on?'true':'false'}" data-a="${a}" data-k="${k}" data-v="${v}">${label}</button>`;}
+function filterChips(){
+  const p=state.prefs;
+  return `<h3>Budget for the whole meal</h3><div class="chips">
+    ${chip('Any',!p.budget,'pref','budget','')}${[150,250,400].map(b=>chip('Under KSh '+b,p.budget===b,'pref','budget',b)).join('')}</div>
+  <h3>Cooking time up to</h3><div class="chips">
+    ${chip('Any',!p.time,'pref','time','')}${[15,30,60].map(t=>chip(t+' min',p.time===t,'pref','time',t)).join('')}</div>
+  <h3>Cooking for</h3><div class="chips">${[1,2,3,4].map(n=>chip(n===1?'One':n===2?'Two':String(n),p.people===n,'pref','people',n)).join('')}</div>
+  <h3>Priority</h3><div class="chips">
+    ${chip('Anything',p.diet==='any','pref','diet','any')}${chip('Vegetarian',p.diet==='veg','pref','diet','veg')}${chip('Cheap & filling',p.diet==='cheap','pref','diet','cheap')}${chip('High protein',p.diet==='protein','pref','diet','protein')}</div>
+  ${hasLimits(p)?'<p style="margin-top:12px"><button class="link" data-a="reset" style="padding-left:0">Reset limits</button></p>':''}`;
+}
+function badgesFor(r){
+  let s='';
+  if(r.veg)s+='<span class="badge">Vegetarian</span>';
+  if(r.ahead)s+='<span class="badge warn">Needs boiled '+(r.ahead==='githeri'?'githeri':r.ahead)+'</span>';
+  if(r.t>=60)s+='<span class="badge warn">Slow cook</span>';
+  return s;
+}
+function todayView(){
+  const p=state.prefs;const pk=state.pick;const r=RID[pk.id];const c=calc(r,p.people);const saved=state.saved.includes(r.id);
+  let extra='';
+  if(pk.fallback)extra=`<div class="note"><b>Nothing fits every limit.</b> Closest meal: ${pk.fallback.join(' and ')||'see below'}. Loosen a limit to see more options.</div>`;
+  else if(pk.only)extra='<div class="note ok">This is the only meal that fits your limits. Loosen one to see more.</div>';
+  return `<section>
+  <h1>Long shift? Let's sort dinner.</h1>
+  <p class="sub">Tell us your budget, your time, or your energy level. We'll help you decide what to eat.</p>
+  <div class="actions">
+    <button class="btn primary big" data-a="pickopen">Pick dinner for me</button>
+    <div class="two"><button class="btn" data-a="go" data-v="buy">Too tired to cook?</button>
+    <button class="btn" data-a="help" aria-expanded="${state.help}">Help me choose</button></div>
+  </div></section>
+  ${state.help?`<div class="panel">${filterChips()}</div>`:`<div class="summary"><span>${hasLimits(p)?'Showing meals: '+esc(summary(p)):'No limits set · for '+p.people+' · use Help me choose to add some'}</span></div>`}
+  ${extra}
+  <article class="pick" aria-label="Tonight's suggestion">
+    <div class="pick-head"><span class="dish" aria-hidden="true">${r.e}</span><div style="min-width:0"><div class="eyebrow">Tonight's suggestion</div><h2>${esc(r.n)}</h2></div></div>
+    <dl class="facts"><div><dt>Cost</dt><dd>${money(c.used)}</dd><small>about${p.people>1?' · '+money(c.per)+' each':''} · amount used</small></div>
+      <div><dt>Time</dt><dd>${r.t} min</dd></div><div><dt>Serves</dt><dd>${p.people}</dd></div></dl>
+    <div class="row"><button class="btn primary" data-a="open" data-v="${r.id}">See recipe</button><button class="btn" data-a="another">Show another</button></div>
+    <div style="margin-top:10px">${badgesFor(r)}</div>
+    <p class="why">${esc(reasons({r,c},p))}</p>
+    <p class="small" style="margin:6px 0 0">Planning estimate from provisional prices, not live market prices. <button class="link" data-a="go" data-v="prices" style="min-height:0;padding:0">Change prices</button></p>
+  </article>
+  <div class="card"><b>Already have some food at home?</b><p class="small" style="margin:2px 0 0">Pick what you have and see meals that need the least shopping.</p>
+    <div class="btn-row"><button class="btn sm" data-a="go" data-v="have">I have these ingredients</button></div></div>`;
+}
+function passesBasic(ev,p){return passes(ev,p);}
+function mealRow(ev,p){
+  const r=ev.r;
+  return `<button class="meal" data-a="open" data-v="${r.id}"><span class="dish" aria-hidden="true">${r.e}</span><span class="mt"><b>${esc(r.n)}</b><small>${money(ev.c.used)} · ${r.t} min · serves ${p.people}</small><span>${badgesFor(r)}</span></span><span class="chev" aria-hidden="true">›</span></button>`;
+}
+function mealsResults(){
+  const p=state.prefs;const toks=state.q.toLowerCase().split(/\s+/).filter(Boolean);
+  let rows=evalAll(p,null).filter(ev=>toks.every(t=>ev.r.hay.includes(t)));
+  const isSaved=state.mealsTab==='saved';
+  if(isSaved)rows=rows.filter(ev=>state.saved.includes(ev.r.id));else rows=rows.filter(ev=>passes(ev,p));
+  if(!isSaved&&p.diet==='cheap')rows.sort((a,b)=>a.c.per-b.c.per);
+  const total=isSaved?state.saved.length:R.length;
+  let html=`<p class="small" id="count" style="margin:10px 0 0">${rows.length} of ${total} ${isSaved?'saved ':''}meals${isSaved?' (limits do not hide saved meals)':''}</p>`;
+  if(!rows.length){
+    html+=`<div class="empty">${isSaved&&!state.saved.length?'No saved meals yet. Open a meal and tap Save.':'No meals match.'}
+      <div>${state.q?'<button class="btn sm" data-a="clearq">Clear search</button> ':''}${!isSaved&&hasLimits(p)?'<button class="btn sm" data-a="reset">Reset limits</button>':''}</div></div>`;
+  }else html+=`<div class="meals">${rows.map(ev=>mealRow(ev,p)).join('')}</div>`;
+  return html;
+}
+function mealsView(){
+  const p=state.prefs;const n=(p.budget?1:0)+(p.time?1:0)+(p.diet!=='any'?1:0);
+  return `<h2>Meals</h2>
+  <label class="small" for="q">Search by dish, ingredient or word (managu, pork, cabbage, goat)</label>
+  <input id="q" type="search" value="${esc(state.q)}" placeholder="Search meals" autocomplete="off">
+  <div class="seg" role="group" aria-label="Which meals">
+    <button aria-pressed="${state.mealsTab==='all'}" data-a="mtab" data-v="all">All meals</button>
+    <button aria-pressed="${state.mealsTab==='saved'}" data-a="mtab" data-v="saved">Saved (${state.saved.length})</button></div>
+  ${state.mealsTab==='all'?`<p style="margin:10px 0 0"><button class="btn sm quiet" data-a="mf" aria-expanded="${state.mf}">Limits${n?' · '+n+' on':''} ${state.mf?'▴':'▾'}</button></p>
+  ${state.mf?`<div class="panel">${filterChips()}</div>`:''}`:''}
+  <div id="results">${mealsResults()}</div>`;
+}
+const HAVE_GROUPS=[['Staples',['unga','rice','wheat','pasta','bread']],
+ ['Vegetables',['onion','tomato','cabbage','sukuma','spinach','managu','carrot','garlic','coriander','potato','sweetpot','nduma','matoke','peas']],
+ ['Protein',['eggs','beef','mince','chicken','pork','goat','tilapia','omena']],
+ ['Already boiled',['beans','ndengu','githeri']]];
+function haveView(){
+  const p=state.prefs;const have=new Set(state.have);
+  let res='';
+  if(!have.size)res='<div class="empty">Tap the items you have. Meals that need the least shopping appear here.</div>';
+  else{
+    const rows=evalAll(p,have).filter(ev=>ev.hit.length>0&&passes(ev,p)).sort((a,b)=>a.miss.length-b.miss.length||a.buyCost-b.buyCost||a.c.used-b.c.used);
+    res=`<p class="small" style="margin:12px 0 0">${rows.length} meal${rows.length===1?'':'s'} use something you have. Limits applied: ${esc(summary(p))}. Budget here means what you would still buy.</p>`;
+    if(!rows.length)res+=`<div class="empty">Nothing matches your limits.<div>${hasLimits(p)?'<button class="btn sm" data-a="reset">Reset limits</button>':''}</div></div>`;
+    else res+=rows.map(ev=>{
+      const r=ev.r;
+      const hit=ev.hit.map(l=>ING[l.id].n.replace(/ \(.*\)/,'')).join(', ');
+      const miss=ev.miss.length?ev.miss.map(l=>ING[l.id].n.replace(/ \(.*\)/,'')).join(', '):'';
+      return `<div class="card"><div class="pick-head"><span class="dish" aria-hidden="true">${r.e}</span><div style="min-width:0"><b>${esc(r.n)}</b><div class="small">${r.t} min · serves ${p.people}</div></div></div>
+        <p style="margin:8px 0 2px;font-size:14px"><b>You have:</b> ${esc(hit)}</p>
+        <p style="margin:0;font-size:14px">${ev.miss.length?`<b>Still to buy:</b> ${esc(miss)} <span class="small">(about ${moneyExact(ev.buyCost)}, whole packs)</span>`:'<b>Nothing to buy.</b>'}</p>
+        <div class="btn-row"><button class="btn sm primary" data-a="open" data-v="${r.id}">See recipe</button><button class="btn sm" data-a="addhave" data-v="${r.id}">Add to list</button></div></div>`;
+    }).join('');
+  }
+  return `<h2>I have these ingredients</h2><p class="sub">Tap what is already in your kitchen.</p>
+  ${HAVE_GROUPS.map(([t,ids])=>`<h3>${t}</h3><div class="chips">${ids.map(id=>chip(esc(ING[id].n.replace(/ \(.*\)/,'')),have.has(id),'have','',id)).join('')}</div>`).join('')}
+  <h3>Kitchen basics</h3><div class="chips">${chip('I have oil, salt and spices',state.pantryOk,'pantry','','x')}</div>
+  ${have.size?'<p style="margin:10px 0 0"><button class="link" data-a="haveclear" style="padding-left:0">Clear selection</button></p>':''}
+  <div id="haveres">${res}</div>`;
+}
+function buyView(){
+  const p=state.prefs;const r=RID[state.pick.id];const c=calc(r,p.people);
+  const own=basket([{rid:r.id,servings:p.people}]);const fresh=basketTotal(own,true);
+  const loc=BUY.filter(b=>b.kind==='local');const tk=BUY.filter(b=>b.kind!=='local');
+  const rng=(arr,n)=>[Math.min(...arr.map(b=>b.lo))*n,Math.max(...arr.map(b=>b.hi))*n];
+  const L=rng(loc,p.people),T=rng(tk,p.people),D=[T[0]+FEE[0],T[1]+FEE[1]];
+  const fmt=a=>'KSh '+a[0].toLocaleString('en-KE')+' to '+a[1].toLocaleString('en-KE');
+  const list=BUY.filter(b=>state.buyKind==='all'||b.kind===state.buyKind);
+  return `<h2>Too tired to cook?</h2>
+  <p class="sub">A decision guide for ${p.people===1?'one person':p.people+' people'}. These are planning ranges, not live prices or live menus.</p>
+  <h3>Cook, buy locally, or order in</h3>
+  <div class="card"><b>Cook: ${esc(r.n)}</b><div class="small">costs you about ${money(c.used)} · about ${money(fresh)} at the shop in full packs · ${r.t} min</div>
+    <div class="btn-row"><button class="btn sm" data-a="open" data-v="${r.id}">See recipe</button></div></div>
+  <div class="card"><b>Local eatery plate: ${fmt(L)}</b><div class="small">Ugali, rice or chapati meals at a nearby eatery. No delivery fee if you collect.</div></div>
+  <div class="card"><b>Restaurant or fast-food takeaway: ${fmt(T)}</b><div class="small">Collected yourself.</div></div>
+  <div class="card"><b>Delivery: ${fmt(D)}</b><div class="small">Takeaway price plus an assumed KSh ${FEE[0]} to ${FEE[1]} for delivery and service fees. The app shows the real fees at checkout, and they change with distance and time.</div></div>
+  <h3>Typical meals, per person</h3>
+  <div class="chips" role="group" aria-label="Type of place">${chip('All',state.buyKind==='all','bkind','','all')}${Object.keys(KINDS).map(k=>chip(KINDS[k],state.buyKind===k,'bkind','',k)).join('')}</div>
+  <div class="meals">${list.map(b=>{
+    const fits=p.budget&&b.lo*p.people<=p.budget;
+    return `<div class="card" style="margin:0"><div style="display:flex;justify-content:space-between;gap:10px"><b>${esc(b.n)}</b><b style="white-space:nowrap">KSh ${b.lo} to ${b.hi}</b></div>
+      <div class="small">${KINDS[b.kind]} · per person · planning estimate${fits?' · low end fits your KSh '+p.budget+' budget':''}</div></div>`;}).join('')}</div>
+  <h3>Check the real menu and price</h3>
+  <div class="card"><p style="margin:0 0 6px"><a href="https://www.ubereats.com/ke" target="_blank" rel="noopener">Open Uber Eats Kenya</a></p>
+    <p class="small" style="margin:0 0 6px">For Glovo, open the Glovo app and search the dish name. This page does not link to Glovo because that page could not be checked.</p>
+    <p class="small" style="margin:0">Always read the item price, delivery fee and service fee at checkout. Prices differ by outlet, area, portion size and time of day.</p></div>`;
+}
+function recipeView(){
+  const r=RID[state.rid];const s=state.serv;const c=calc(r,s);const saved=state.saved.includes(r.id);
+  const own=basket([{rid:r.id,servings:s}]);const full=basketTotal(own,true);
+  const byId={};own.forEach(x=>byId[x.id]=x);
+  const food=r.animal;
+  return `<button class="back" data-a="back">‹ Back</button>
+  <div class="pick-head"><span class="dish" aria-hidden="true">${r.e}</span><div style="min-width:0"><h2 style="margin:0">${esc(r.n)}</h2><div class="small">${r.t} min cooking once ingredients are ready</div></div></div>
+  <div style="margin-top:8px">${badgesFor(r)}</div>
+  ${r.ahead?`<div class="note"><b>Before you start:</b> ${esc(AHEAD[r.ahead])} The ${r.t} minutes assume this is done.</div>`:''}
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:12px"><b>Servings</b>
+    <div class="stepper"><button data-a="serv" data-v="-1" aria-label="Fewer servings">−</button><output aria-live="polite">${s}</output><button data-a="serv" data-v="1" aria-label="More servings">+</button></div></div>
+  <div class="cost"><div><small>What this meal costs you</small><b>${money(c.used)}</b><small>${money(c.per)} per serving</small></div>
+    <div><small>What you'd pay at the shop</small><b>${money(full)}</b><small>without oil, salt and spices; flour and rice last several meals</small></div></div>
+  <div class="row" style="grid-template-columns:1fr 1fr"><button class="btn primary" data-a="addlist">Add to shopping list</button><button class="btn" data-a="save" data-v="${r.id}" aria-pressed="${saved}">${saved?'Saved ✓':'Save meal'}</button></div>
+  <h3>Ingredients for ${s}</h3>
+  <div class="scroll"><table class="tbl"><thead><tr><th>Item</th><th>Use</th><th class="num">Cost of the part used</th></tr></thead><tbody>
+  ${c.lines.map(l=>{const g=ING[l.id];const b=byId[l.id];return `<tr><td>${esc(g.n)}${g.grp==='pantry'?'<div class="small">usually at home</div>':''}<div class="small">At the shop: ${b.packs} × ${esc(g.pl)} = KSh ${b.buy.toLocaleString('en-KE')}</div></td><td>${fmtQty(l.id,l.qty)}</td><td class="num">${moneyExact(l.used)}</td></tr>`;}).join('')}
+  </tbody></table></div>
+  <p class="small" style="margin-top:8px">Costs use provisional planning prices, not live market prices. Whole items such as eggs and fish round up. <button class="link" data-a="go" data-v="prices" style="min-height:0;padding:0">Edit prices</button></p>
+  <h3>Method</h3><ol class="steps">${r.steps.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>
+  ${food?'<div class="note"><b>Food safety:</b> cook meat, fish and eggs all the way through. Refrigerate leftovers promptly and reheat until steaming hot.</div>':''}`;
+}
+function listView(){
+  const entries=state.list;
+  if(!entries.length)return `<h2>Shopping list</h2><div class="empty">Your list is empty.<br>Open a meal and tap "Add to shopping list".<div><button class="btn" data-a="go" data-v="meals">Browse meals</button></div></div>`;
+  const b=basket(entries);
+  const sepAll=entries.reduce((a,e)=>a+basketTotal(basket([e]),true),0);
+  const merged=basketTotal(b,true);const saveAmt=sepAll-merged;
+  const remaining=b.filter(x=>!isChecked(x.id)).reduce((a,x)=>a+x.buy,0);
+  const usedTotal=b.reduce((a,x)=>a+x.used,0);
+  const groups=[['fresh','Fresh food and protein'],['staple','Staples'],['pantry','Kitchen basics (ticked = you have it)']];
+  return `<h2>Shopping list</h2>
+  <h3>Meals on this list</h3>
+  ${entries.map(e=>{const r=RID[e.rid];return `<div class="card" style="display:flex;align-items:center;gap:10px;justify-content:space-between;flex-wrap:wrap"><b style="min-width:0">${r.e} ${esc(r.n)}</b>
+    <span class="stepper"><button data-a="lserv" data-v="${e.rid}" data-k="-1" aria-label="Fewer servings of ${esc(r.n)}">−</button><output>${e.servings}</output><button data-a="lserv" data-v="${e.rid}" data-k="1" aria-label="More servings of ${esc(r.n)}">+</button>
+    </span><button class="link" data-a="lrm" data-v="${e.rid}" aria-label="Remove ${esc(r.n)}" style="margin-left:auto">Remove</button></div>`;}).join('')}
+  <div class="cost"><div><small>Still to buy</small><b>${moneyExact(remaining)}</b><small>unticked items, whole packs</small></div>
+    <div><small>Amount the meals use</small><b>${moneyExact(usedTotal)}</b><small>leftovers stay in your kitchen</small></div></div>
+  ${saveAmt>0?`<div class="note ok">Shared items are merged. Buying them once saves about ${moneyExact(saveAmt)} compared with shopping for each meal separately.</div>`:''}
+  ${groups.map(([g,t])=>{const items=b.filter(x=>ING[x.id].grp===g).sort((x,y)=>ING[x.id].n.localeCompare(ING[y.id].n));if(!items.length)return '';
+    return `<h3>${t}</h3>${items.map(x=>{const gi=ING[x.id];const done=isChecked(x.id);
+      const need=x.from.length>1?x.from.map(f=>fmtQty(x.id,f.qty)).join(' + ')+' = '+fmtQty(x.id,x.need):fmtQty(x.id,x.need);
+      return `<div class="li${done?' done':''}"><input type="checkbox" id="c-${x.id}" data-a="chk" data-v="${x.id}" ${done?'checked':''} aria-label="${esc(gi.n)}"><label class="lt" for="c-${x.id}"><b>${esc(gi.n)}</b><div class="small">Recipes need: ${esc(need)}</div><div class="small">Buy: ${x.packs} × ${esc(gi.pl)}</div></label><span class="buy">${moneyExact(x.buy)}</span></div>`;}).join('')}`;}).join('')}
+  <p class="small" style="margin-top:12px">Provisional prices. Edit them under <button class="link" data-a="go" data-v="prices" style="min-height:0;padding:0">Prices</button>.</p>
+  <div style="margin-top:8px">${state.clearAsk?'<button class="btn" data-a="lclear2" style="border-color:var(--warn);color:var(--warn)">Yes, clear the whole list</button> <button class="btn quiet" data-a="lclear0">Keep it</button>':'<button class="btn quiet" data-a="lclear1">Clear list</button>'}</div>`;
+}
+function pricesView(){
+  const groups=[['fresh','Fresh food and protein'],['staple','Staples'],['pantry','Kitchen basics']];
+  return `<button class="back" data-a="back">‹ Back</button><h2>Prices</h2>
+  <div class="note"><b>These are provisional.</b> They are the app author's rough planning estimates for Nairobi, not checked against current market prices. Replace any of them with what you actually pay. Changes are saved on this device only.</div>
+  ${groups.map(([g,t])=>`<h3>${t}</h3>${Object.values(ING).filter(i=>i.grp===g).map(i=>`<div class="price${state.prices[i.id]!==undefined?' mod':''}"><label for="p-${i.id}"><b>${esc(i.n)}</b><div class="small">KSh per ${esc(i.pl)}</div></label><input id="p-${i.id}" type="number" inputmode="numeric" min="1" step="1" data-price="${i.id}" value="${price(i.id)}"></div>`).join('')}`).join('')}
+  <p style="margin-top:14px"><button class="btn quiet" data-a="pricereset">Reset all prices</button></p>`;
+}
+function navHTML(){
+  const cur=state.view==='recipe'?state.back:state.view;
+  return `<nav class="tabs" aria-label="Main"><div class="in">${TABS.map(([v,l])=>`<button data-a="go" data-v="${v}" ${cur===v?'aria-current="page"':''}><svg viewBox="0 0 24 24" aria-hidden="true">${ICON[v==='buy'?'buy':v]}</svg>${l}${v==='list'&&state.list.length?`<span class="n" aria-label="${state.list.length} meals">${state.list.length}</span>`:''}</button>`).join('')}</div></nav>`;
+}
+function render(){
+  const app=$('#app');
+  try{
+    const v=state.view;
+    const body=v==='today'?todayView():v==='meals'?mealsView():v==='have'?haveView():v==='buy'?buyView():v==='recipe'?recipeView():v==='list'?listView():pricesView();
+    app.innerHTML=`<div class="wrap"><header class="top"><div class="brand"><span class="logo">PeeQa</span><span class="tag">Dinner, sorted.</span></div><button class="link" data-a="go" data-v="prices">Prices</button></header><main id="main">${body}</main></div>${navHTML()}`;
+  }catch(err){
+    app.innerHTML=`<div class="wrap"><div class="note"><b>Something went wrong showing this screen.</b> Try reloading. If it keeps happening, reset the saved data on this device.</div><p><button class="btn" data-a="wipe">Reset saved data</button></p><pre class="small" style="white-space:pre-wrap">${esc(err&&err.message||err)}</pre></div>`;
+  }
+}
+let toastT;
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2200);}
+
+/* ================= Actions ================= */
+function go(v){state.view=v;if(v!=='recipe')state.back=v;state.clearAsk=false;window.scrollTo(0,0);render();}
+function openRecipe(id){if(state.view!=='recipe')state.back=state.view;state.rid=id;state.serv=state.prefs.people;state.view='recipe';window.scrollTo(0,0);render();}
+function setPref(k,v){
+  const p=state.prefs;
+  if(k==='budget'||k==='time')p[k]=v===''?null:Number(v);
+  else if(k==='people')p.people=Number(v);else p.diet=v;
+  state.seen=new Set();pickNext();save();render();
+}
+function act(a,v,k){
+  switch(a){
+    case 'go':go(v);break;
+    case 'back':state.view=state.back||'today';window.scrollTo(0,0);render();break;
+    case 'open':openRecipe(v);break;
+    case 'pickopen':pickNext();openRecipe(state.pick.id);break;
+    case 'another':pickNext();render();break;
+    case 'help':state.help=!state.help;render();break;
+    case 'mf':state.mf=!state.mf;render();break;
+    case 'pref':setPref(k,v);break;
+    case 'reset':state.prefs.budget=null;state.prefs.time=null;state.prefs.diet='any';state.seen=new Set();pickNext();save();render();toast('Limits cleared');break;
+    case 'save':{const i=state.saved.indexOf(v);if(i>=0){state.saved.splice(i,1);toast('Removed from saved');}else{state.saved.push(v);toast('Saved');}save();render();break;}
+    case 'addlist':{const e=state.list.find(x=>x.rid===state.rid);if(e)e.servings=state.serv;else state.list.push({rid:state.rid,servings:state.serv});save();render();toast('On your shopping list');break;}
+    case 'addhave':{const e=state.list.find(x=>x.rid===v);if(e)e.servings=state.prefs.people;else state.list.push({rid:v,servings:state.prefs.people});
+      RID[v].ing.forEach(([id])=>{if(state.have.includes(id)||(ING[id].grp==='pantry'&&state.pantryOk))state.checked[id]=true;});
+      save();render();toast('Added. Items you have are ticked.');break;}
+    case 'serv':state.serv=Math.min(8,Math.max(1,state.serv+Number(v)));render();break;
+    case 'lserv':{const e=state.list.find(x=>x.rid===v);if(e){e.servings=Math.min(8,Math.max(1,e.servings+Number(k)));save();render();}break;}
+    case 'lrm':state.list=state.list.filter(x=>x.rid!==v);save();render();break;
+    case 'chk':state.checked[v]=!isChecked(v);save();render();break;
+    case 'have':{const i=state.have.indexOf(v);if(i>=0)state.have.splice(i,1);else state.have.push(v);save();render();break;}
+    case 'pantry':state.pantryOk=!state.pantryOk;save();render();break;
+    case 'haveclear':state.have=[];save();render();break;
+    case 'mtab':state.mealsTab=v;render();break;
+    case 'bkind':state.buyKind=v;render();break;
+    case 'clearq':state.q='';render();break;
+    case 'lclear1':state.clearAsk=true;render();break;
+    case 'lclear0':state.clearAsk=false;render();break;
+    case 'lclear2':state.list=[];state.checked={};state.clearAsk=false;save();render();toast('List cleared');break;
+    case 'pricereset':state.prices={};save();render();toast('Prices reset');break;
+    case 'wipe':try{localStorage.removeItem(KEY);}catch(e){}location.reload();break;
+  }
+}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-a]');if(!t)return;act(t.dataset.a,t.dataset.v,t.dataset.k);});
+document.addEventListener('input',e=>{
+  if(e.target.id==='q'){state.q=e.target.value;const r=$('#results');if(r)r.innerHTML=mealsResults();}
+});
+document.addEventListener('change',e=>{
+  const id=e.target.dataset&&e.target.dataset.price;if(!id||!ING[id])return;
+  const v=parseFloat(e.target.value);
+  if(isFinite(v)&&v>0&&v<100000){state.prices[id]=v;}else{delete state.prices[id];e.target.value=ING[id].pr;}
+  const row=e.target.closest('.price');if(row)row.classList.toggle('mod',state.prices[id]!==undefined);
+  save();toast('Price saved');
+});
+
+/* ================= Boot ================= */
+load();pickNext();render();
+window.LTN={ING,R,RID,BUY,state,calc,basket,basketTotal,evalAll,passes,pickNext,roundQty,fmtQty,packsFor,money,r5,sanitize};
+})();
+</script>
+
+</body></html>
